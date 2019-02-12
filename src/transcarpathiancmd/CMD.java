@@ -93,7 +93,10 @@ public class CMD extends javax.swing.JFrame {
         Matcher helpMatcher = helpPattern.matcher(command); helpMatcher.find();
         String newPath = helpMatcher.group(1);
         path = this.cd(path, newPath);
-      } else {
+      } else if (dirPattern.matcher(command).matches()) {
+        this.console.append(this.dir(path));
+      }
+      else {
         this.console.append("Ти позерай шо пишеш, бо я не розуміву!\n");
       }
       this.console.append(path + "> ");
@@ -138,17 +141,22 @@ public class CMD extends javax.swing.JFrame {
     });
   }
 
+  public String dir(String path) {
+    File folder = new File(path);
+    return String.join("\n", folder.list()) + "\n";
+  }
+  
   public String cd(String prevPath, String newPath){
-    if(!newPath.contains("..")){
+    if (!newPath.contains("..")) {
       File file = new File(newPath);
       if(file.exists() && file.isAbsolute() && file.isDirectory()){
         return file.getAbsolutePath();
       } else {
         file = new File(prevPath + "\\\\" + newPath);
-        if(file.exists() && file.isDirectory()) {
-            return file.getAbsolutePath();
+        if (file.exists() && file.isDirectory()) {
+          return file.getAbsolutePath();
         }
-        return "Не понявім... Щи раз пробуй";
+        return prevPath;
       }
     } else {
       String[] arrOfDots = newPath.split("\\\\|/");

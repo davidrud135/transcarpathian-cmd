@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
 /**
@@ -23,6 +24,17 @@ import javax.swing.JFrame;
  */
 public class CMD extends javax.swing.JFrame {
 
+  int ignoreUKRCase = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
+  Pattern linePattern = Pattern.compile("^([A-Z]:[\\\\/].*)> (.*)$");
+  Pattern mkdirPattern = Pattern.compile("^создай мі папку (.+)$", ignoreUKRCase);
+  Pattern cdPattern = Pattern.compile("^пуйти (.+)$", ignoreUKRCase);
+  Pattern rmPattern = Pattern.compile("^вушмарь (.*)$", ignoreUKRCase);
+  Pattern colorPattern = Pattern.compile("^цвіт (.+)$", ignoreUKRCase);
+  Pattern dirPattern = Pattern.compile("^вкажи шо маєш$", ignoreUKRCase);
+  Pattern clsPattern = Pattern.compile("^повтерай всьо$", ignoreUKRCase);
+  Pattern datePattern = Pattern.compile("^вкажи нишню дату$", ignoreUKRCase);
+  Pattern helpPattern = Pattern.compile("^поможи мі$", ignoreUKRCase);
+  Pattern exitPattern = Pattern.compile("^вуйти гет$", ignoreUKRCase);
   HashMap<String, Color> colorsMap= new HashMap<>();
   String path = System.getProperty("user.dir");
   String[] allLines;
@@ -97,17 +109,6 @@ public class CMD extends javax.swing.JFrame {
   }// </editor-fold>//GEN-END:initComponents
 
   private void onKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_onKeyReleased
-    int ignoreUKRCase = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
-    Pattern linePattern = Pattern.compile("^([A-Z]:[\\\\/].*)> (.*)$");
-    Pattern mkdirPattern = Pattern.compile("^создай мі папку (.+)$", ignoreUKRCase);
-    Pattern cdPattern = Pattern.compile("^пуйти (.+)$", ignoreUKRCase);
-    Pattern rmPattern = Pattern.compile("^вушмарь (.*)$", ignoreUKRCase);
-    Pattern colorPattern = Pattern.compile("^цвіт (.+)$", ignoreUKRCase);
-    Pattern dirPattern = Pattern.compile("^вкажи шо маєш$", ignoreUKRCase);
-    Pattern clsPattern = Pattern.compile("^повтерай всьо$", ignoreUKRCase);
-    Pattern datePattern = Pattern.compile("^вкажи нишню дату$", ignoreUKRCase);
-    Pattern helpPattern = Pattern.compile("^поможи мі$", ignoreUKRCase);
-    Pattern exitPattern = Pattern.compile("^вуйти гет$", ignoreUKRCase);
     if (evt.getKeyCode() == 10) {
       try {
         allLines = this.console.getText().split("\n");
@@ -194,6 +195,7 @@ public class CMD extends javax.swing.JFrame {
         CMD frame = new CMD();
         frame.setSize(1200, 600);
         frame.setLocationRelativeTo(null);
+        frame.setIconImage(new ImageIcon("src/images/terminal.png").getImage());
         frame.setVisible(true);
       }
     });

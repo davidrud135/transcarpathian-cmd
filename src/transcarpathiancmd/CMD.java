@@ -2,8 +2,11 @@ package transcarpathiancmd;
 
 import java.awt.Color;
 import java.awt.Toolkit;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
@@ -35,6 +38,7 @@ public class CMD extends javax.swing.JFrame {
   Pattern cdPattern = Pattern.compile("^пуйти (.+)$", ignoreUKRCase);
   Pattern rmPattern = Pattern.compile("^вушмарь (.*)$", ignoreUKRCase);
   Pattern colorPattern = Pattern.compile("^цвіт (.+)$", ignoreUKRCase);
+  Pattern typePattern = Pattern.compile("^дай попозерати (.+)$", ignoreUKRCase);
   Pattern dirPattern = Pattern.compile("^вкажи шо маєш$", ignoreUKRCase);
   Pattern clsPattern = Pattern.compile("^повтерай всьо$", ignoreUKRCase);
   Pattern datePattern = Pattern.compile("^вкажи нишню дату$", ignoreUKRCase);
@@ -147,7 +151,11 @@ public class CMD extends javax.swing.JFrame {
           Matcher colorMatcher = colorPattern.matcher(command); colorMatcher.find();
           String color = colorMatcher.group(1).toLowerCase();
           this.console.setForeground(this.colorsMap.getOrDefault(color, this.console.getForeground()));
-        } else if (clsPattern.matcher(command).matches()) {
+        } else if(typePattern.matcher(command).matches()){
+					Matcher typeMatcher = typePattern.matcher(command); typeMatcher.find();
+					String pathToFile = typeMatcher.group(1);
+					this.console.append(this.type(path, pathToFile));
+				}	else if (clsPattern.matcher(command).matches()) {
           this.cls();
         } else if (datePattern.matcher(command).matches()) {
           this.console.append(this.date());
@@ -162,8 +170,8 @@ public class CMD extends javax.swing.JFrame {
         } else {
           this.console.append("Ти позерай шо пишеш, бо я тебе не розуміву...\n");
         }
-        arrOfCmds.add(command);
-        counterOfCommands++;
+				arrOfCmds.add(command);
+				counterOfCommands++;
         this.showPath();
       } catch (Exception e) {
         System.out.println(e.getMessage());
@@ -196,7 +204,7 @@ public class CMD extends javax.swing.JFrame {
 		} else if(isArrowDown) {
 			evt.consume();
 			if(counterOfCommands < arrOfCmds.size() - 1) {
-        counterOfCommands++;
+				counterOfCommands++;
         console.setText(Arrays.stream(allLines).limit(allLines.length - 1).collect(Collectors.joining("\n")) + "\n");
         console.append(path + "> " + arrOfCmds.get(counterOfCommands));
       }
@@ -242,6 +250,29 @@ public class CMD extends javax.swing.JFrame {
     });
   }
 	
+	public String type(String currentPath, String pathToFile){
+		ArrayList<String> arrOfLines = new ArrayList<>();
+		BufferedReader inputReader;
+		try {
+			if (new File(pathToFile).isAbsolute()) {
+				inputReader = new BufferedReader(new InputStreamReader(new FileInputStream(pathToFile), "Cp1251"));
+				while (inputReader.ready()) {
+					arrOfLines.add(inputReader.readLine());
+				}
+			} else {
+				inputReader = new BufferedReader(new InputStreamReader(new FileInputStream(currentPath + "\\" + pathToFile), "Cp1251"));
+				while (inputReader.ready()) {
+					arrOfLines.add(inputReader.readLine());
+				}
+			}
+			inputReader.close();
+		} catch (IOException iOException) {
+			iOException.printStackTrace();
+			return "";
+		}
+		return String.join("\n", arrOfLines) + "\n";
+	}
+	
 	public void copy(String currentPath, String pathToFile, String newPath) {
 		File newFile;
 		File file;
@@ -286,6 +317,7 @@ public class CMD extends javax.swing.JFrame {
       "> пуйти [путь] - змінює директорію за заданим шляхом",
       "> вушмарь [путь] - видаляє файл або папку за заданим шляхом",
       "> цвіт [червений|помаранчевий|зелений|як ся було] - змінює колір шрифту",
+			"> дай попозерати [путь] - відображає вміст файлу за заданим шляхом",
       "> вкажи шо маєш - виводить вміст теперішньої папки",
       "> повтерай всьо - очищує екран",
       "> вкажи нишню дату - виводить теперішню дату",

@@ -1,6 +1,7 @@
 package transcarpathiancmd;
 
 import java.awt.Color;
+import java.awt.Toolkit;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -10,7 +11,6 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
 /**
@@ -196,7 +196,7 @@ public class CMD extends javax.swing.JFrame {
         CMD frame = new CMD();
         frame.setSize(1200, 600);
         frame.setLocationRelativeTo(null);
-        frame.setIconImage(new ImageIcon("src/images/terminal.png").getImage());
+        frame.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/terminal.png")));
         frame.setVisible(true);
       }
     });

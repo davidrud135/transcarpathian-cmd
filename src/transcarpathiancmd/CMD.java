@@ -3,6 +3,9 @@ package transcarpathiancmd;
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +30,7 @@ public class CMD extends javax.swing.JFrame {
 
   int ignoreUKRCase = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
   Pattern linePattern = Pattern.compile("^([A-Z]:[\\\\/].*)> (.*)$");
+	Pattern copyPattern = Pattern.compile("^ши яден файл (.+) (.+)$", ignoreUKRCase);
   Pattern mkdirPattern = Pattern.compile("^создай мі папку (.+)$", ignoreUKRCase);
   Pattern cdPattern = Pattern.compile("^пуйти (.+)$", ignoreUKRCase);
   Pattern rmPattern = Pattern.compile("^вушмарь (.*)$", ignoreUKRCase);
@@ -36,6 +40,7 @@ public class CMD extends javax.swing.JFrame {
   Pattern datePattern = Pattern.compile("^вкажи нишню дату$", ignoreUKRCase);
   Pattern helpPattern = Pattern.compile("^поможи мі$", ignoreUKRCase);
   Pattern exitPattern = Pattern.compile("^вуйти гет$", ignoreUKRCase);
+	
   HashMap<String, Color> colorsMap= new HashMap<>();
   String path = System.getProperty("user.dir");
   String[] allLines;
@@ -49,7 +54,7 @@ public class CMD extends javax.swing.JFrame {
     this.colorsMap.put("червений", Color.red);
     this.colorsMap.put("помаранчевий", Color.orange);
     this.colorsMap.put("зелений", Color.green);
-    this.colorsMap.put("як ся було", Color.white);
+    this.colorsMap.put("як сі було", Color.white);
     this.showPath();
   }
 
@@ -123,7 +128,12 @@ public class CMD extends javax.swing.JFrame {
         Matcher lineMatcher = linePattern.matcher(clearLastLine); lineMatcher.find();
         path = lineMatcher.group(1);
         command = lineMatcher.group(2);
-        if (cdPattern.matcher(command).matches()) {
+				if(copyPattern.matcher(command).matches()){
+					Matcher copyMatcher = copyPattern.matcher(command); copyMatcher.find();
+					String pathToFile = copyMatcher.group(1);
+					String newPath = copyMatcher.group(2);
+					this.copy(path, pathToFile, newPath);
+				} else if (cdPattern.matcher(command).matches()) {
           Matcher cdMatcher = cdPattern.matcher(command); cdMatcher.find();
           String newPath = cdMatcher.group(1);
           path = this.cd(path, newPath);
@@ -150,14 +160,13 @@ public class CMD extends javax.swing.JFrame {
         } else if (exitPattern.matcher(command).matches()) {
           System.exit(0);
         } else {
-          this.console.append("Ти позерай шо пишеш, бо я тебе не розуміву..\n");
+          this.console.append("Ти позерай шо пишеш, бо я тебе не розуміву...\n");
         }
         arrOfCmds.add(command);
         counterOfCommands++;
         this.showPath();
       } catch (Exception e) {
         System.out.println(e.getMessage());
-        this.cls();
         this.showPath();
       }
     }
@@ -232,6 +241,35 @@ public class CMD extends javax.swing.JFrame {
       }
     });
   }
+	
+	public void copy(String currentPath, String pathToFile, String newPath) {
+		File newFile;
+		File file;
+		
+		try {
+			file = new File(pathToFile);
+			if (file.isAbsolute()) {
+				newFile = new File(newPath);
+				if (newFile.isAbsolute()) {
+					Files.copy(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				} else {
+					newFile = new File(currentPath + "\\" + newPath);
+					Files.copy(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				}
+			} else {
+				file = new File(currentPath + "\\" + pathToFile);
+				newFile = new File(newPath);
+				if (newFile.isAbsolute()) {
+					Files.copy(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				} else {
+					newFile = new File(currentPath + "\\" + newPath);
+					Files.copy(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				}
+			}
+		} catch (IOException iOException) {
+			iOException.printStackTrace();
+		}
+	}
 
   public String date() {
     Calendar calendar = Calendar.getInstance();
@@ -243,6 +281,7 @@ public class CMD extends javax.swing.JFrame {
   public String help() {
     return String.join("\n", new String[] {
       "Ту є то, шо мож робити:",
+			"> ши яден файл [старий путь] [новий путь] - знаходить файл за старим шляхом і копіює за новим",
       "> создай мі папку [путь] - створює папку за заданим шляхом",
       "> пуйти [путь] - змінює директорію за заданим шляхом",
       "> вушмарь [путь] - видаляє файл або папку за заданим шляхом",

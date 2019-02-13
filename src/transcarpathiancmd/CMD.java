@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Toolkit;
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -40,6 +41,8 @@ public class CMD extends javax.swing.JFrame {
   String[] allLines;
   String lastLine;
   String command;
+  int counterOfCommands = 0;
+  ArrayList<String> arrOfCmds = new ArrayList<>();
   
   public CMD() {
     initComponents();
@@ -70,6 +73,9 @@ public class CMD extends javax.swing.JFrame {
     console.setForeground(new java.awt.Color(255, 255, 255));
     console.setRows(5);
     console.addKeyListener(new java.awt.event.KeyAdapter() {
+      public void keyPressed(java.awt.event.KeyEvent evt) {
+        onKeyPressed(evt);
+      }
       public void keyReleased(java.awt.event.KeyEvent evt) {
         onKeyReleased(evt);
       }
@@ -146,6 +152,8 @@ public class CMD extends javax.swing.JFrame {
         } else {
           this.console.append("Ти позерай шо пишеш, бо я тебе не розуміву..\n");
         }
+        arrOfCmds.add(command);
+        counterOfCommands++;
         this.showPath();
       } catch (Exception e) {
         System.out.println(e.getMessage());
@@ -162,6 +170,29 @@ public class CMD extends javax.swing.JFrame {
   private void onFormHide(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_onFormHide
     setExtendedState(getExtendedState() | JFrame.ICONIFIED);
   }//GEN-LAST:event_onFormHide
+
+  private void onKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_onKeyPressed
+    boolean isArrowUp = evt.getKeyCode() == 38;
+    boolean isArrowDown = evt.getKeyCode() == 40;
+		allLines = this.console.getText().split("\n");
+		lastLine = allLines[allLines.length - 1];
+    
+		if(isArrowUp) {
+			evt.consume();
+			if(allLines.length > 1 && counterOfCommands > 0) {
+        counterOfCommands--;
+        console.setText(Arrays.stream(allLines).limit(allLines.length - 1).collect(Collectors.joining("\n")) + "\n");
+        console.append(path + "> " + arrOfCmds.get(counterOfCommands));
+      }
+		} else if(isArrowDown) {
+			evt.consume();
+			if(counterOfCommands < arrOfCmds.size() - 1) {
+        counterOfCommands++;
+        console.setText(Arrays.stream(allLines).limit(allLines.length - 1).collect(Collectors.joining("\n")) + "\n");
+        console.append(path + "> " + arrOfCmds.get(counterOfCommands));
+      }
+		}
+  }//GEN-LAST:event_onKeyPressed
 
   /**
    * @param args the command line arguments

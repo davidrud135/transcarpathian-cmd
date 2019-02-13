@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.swing.JFrame;
 
 /**
  *
@@ -44,6 +45,7 @@ public class CMD extends javax.swing.JFrame {
     jScrollPane1 = new javax.swing.JScrollPane();
     console = new javax.swing.JTextArea();
     closeBtn = new javax.swing.JButton();
+    hideBtn = new javax.swing.JButton();
 
     setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
     setUndecorated(true);
@@ -64,7 +66,7 @@ public class CMD extends javax.swing.JFrame {
 
     getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 36, 1200, 564));
 
-    closeBtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/close-btn-image.png"))); // NOI18N
+    closeBtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/close-btn-image.png"))); // NOI18N
     closeBtn.setBorder(null);
     closeBtn.setBorderPainted(false);
     closeBtn.setContentAreaFilled(false);
@@ -76,12 +78,23 @@ public class CMD extends javax.swing.JFrame {
     });
     getContentPane().add(closeBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(1170, 6, -1, -1));
 
+    hideBtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/hide-btn-image.png"))); // NOI18N
+    hideBtn.setBorder(null);
+    hideBtn.setBorderPainted(false);
+    hideBtn.setContentAreaFilled(false);
+    hideBtn.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+    hideBtn.setMaximumSize(new java.awt.Dimension(24, 24));
+    hideBtn.setMinimumSize(new java.awt.Dimension(24, 24));
+    hideBtn.setPreferredSize(new java.awt.Dimension(24, 24));
+    hideBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+      public void mouseClicked(java.awt.event.MouseEvent evt) {
+        onFormHide(evt);
+      }
+    });
+    getContentPane().add(hideBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(1135, 6, -1, -1));
+
     pack();
   }// </editor-fold>//GEN-END:initComponents
-
-  private void onFormClose(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_onFormClose
-    System.exit(0);
-  }//GEN-LAST:event_onFormClose
 
   private void onKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_onKeyReleased
     int ignoreUKRCase = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
@@ -139,6 +152,14 @@ public class CMD extends javax.swing.JFrame {
       }
     }
   }//GEN-LAST:event_onKeyReleased
+
+  private void onFormClose(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_onFormClose
+    System.exit(0);
+  }//GEN-LAST:event_onFormClose
+
+  private void onFormHide(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_onFormHide
+    setExtendedState(getExtendedState() | JFrame.ICONIFIED);
+  }//GEN-LAST:event_onFormHide
 
   /**
    * @param args the command line arguments
@@ -257,6 +278,7 @@ public class CMD extends javax.swing.JFrame {
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton closeBtn;
   private javax.swing.JTextArea console;
+  private javax.swing.JButton hideBtn;
   private javax.swing.JScrollPane jScrollPane1;
   // End of variables declaration//GEN-END:variables
 }

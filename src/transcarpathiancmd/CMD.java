@@ -66,7 +66,7 @@ public class CMD extends javax.swing.JFrame {
 
     console.setBackground(new java.awt.Color(10, 40, 50));
     console.setColumns(20);
-    console.setFont(new java.awt.Font("Arial", 1, 20)); // NOI18N
+    console.setFont(new java.awt.Font("Century Gothic", 3, 20)); // NOI18N
     console.setForeground(new java.awt.Color(255, 255, 255));
     console.setRows(5);
     console.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -113,7 +113,8 @@ public class CMD extends javax.swing.JFrame {
       try {
         allLines = this.console.getText().split("\n");
         lastLine = allLines[allLines.length - 1];
-        Matcher lineMatcher = linePattern.matcher(lastLine); lineMatcher.find();
+        String clearLastLine = lastLine.replaceAll(" +", " ").trim();
+        Matcher lineMatcher = linePattern.matcher(clearLastLine); lineMatcher.find();
         path = lineMatcher.group(1);
         command = lineMatcher.group(2);
         if (cdPattern.matcher(command).matches()) {
@@ -234,7 +235,7 @@ public class CMD extends javax.swing.JFrame {
   }
   
   public void showPath() {
-    this.console.append(path + "> ");
+    this.console.append(String.format("%s> ", path));
   }
   
   public void cls() {

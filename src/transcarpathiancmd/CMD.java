@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 /**
  *
- * @authors group CS-31 featuring 
+ * @authors group CS-31:
  *  Калабін Олександр, 
  *  Свалявчик Олександр, 
  *  Влад Гутич, 
@@ -30,7 +30,11 @@ public class CMD extends javax.swing.JFrame {
   
   public CMD() {
     initComponents();
-    this.console.setText(path + "> ");
+    this.colorsMap.put("червений", Color.red);
+    this.colorsMap.put("помаранчевий", Color.orange);
+    this.colorsMap.put("зелений", Color.green);
+    this.colorsMap.put("як ся було", Color.white);
+    this.showPath();
   }
 
   @SuppressWarnings("unchecked")
@@ -80,26 +84,59 @@ public class CMD extends javax.swing.JFrame {
   }//GEN-LAST:event_onFormClose
 
   private void onKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_onKeyReleased
+    int ignoreUKRCase = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
     Pattern linePattern = Pattern.compile("^([A-Z]:[\\\\/].*)> (.*)$");
-    Pattern helpPattern = Pattern.compile("^пуйти (.*)$", Pattern.CASE_INSENSITIVE);
-    Pattern dirPattern = Pattern.compile("^вкажи шо маєш$", Pattern.CASE_INSENSITIVE);
+    Pattern mkdirPattern = Pattern.compile("^создай мі папку (.+)$", ignoreUKRCase);
+    Pattern cdPattern = Pattern.compile("^пуйти (.+)$", ignoreUKRCase);
+    Pattern rmPattern = Pattern.compile("^вушмарь (.*)$", ignoreUKRCase);
+    Pattern colorPattern = Pattern.compile("^цвіт (.+)$", ignoreUKRCase);
+    Pattern dirPattern = Pattern.compile("^вкажи шо маєш$", ignoreUKRCase);
+    Pattern clsPattern = Pattern.compile("^повтерай всьо$", ignoreUKRCase);
+    Pattern datePattern = Pattern.compile("^вкажи нишню дату$", ignoreUKRCase);
+    Pattern helpPattern = Pattern.compile("^поможи мі$", ignoreUKRCase);
+    Pattern exitPattern = Pattern.compile("^вуйти гет$", ignoreUKRCase);
     if (evt.getKeyCode() == 10) {
-      allLines = this.console.getText().split("\n");
-      lastLine = allLines[allLines.length - 1];
-      Matcher lineMatcher = linePattern.matcher(lastLine); lineMatcher.find();
-      path = lineMatcher.group(1);
-      command = lineMatcher.group(2);
-      if (helpPattern.matcher(command).matches()) {
-        Matcher helpMatcher = helpPattern.matcher(command); helpMatcher.find();
-        String newPath = helpMatcher.group(1);
-        path = this.cd(path, newPath);
-      } else if (dirPattern.matcher(command).matches()) {
-        this.console.append(this.dir(path));
+      try {
+        allLines = this.console.getText().split("\n");
+        lastLine = allLines[allLines.length - 1];
+        Matcher lineMatcher = linePattern.matcher(lastLine); lineMatcher.find();
+        path = lineMatcher.group(1);
+        command = lineMatcher.group(2);
+        if (cdPattern.matcher(command).matches()) {
+          Matcher cdMatcher = cdPattern.matcher(command); cdMatcher.find();
+          String newPath = cdMatcher.group(1);
+          path = this.cd(path, newPath);
+        } else if (dirPattern.matcher(command).matches()) {
+          this.console.append(this.dir(path));
+        } else if(mkdirPattern.matcher(command).matches()) {
+          Matcher mkdirMatcher = mkdirPattern.matcher(command); mkdirMatcher.find();
+          String pathToDir = mkdirMatcher.group(1);
+          this.mkdir(path, pathToDir);
+        } else if (colorPattern.matcher(command).matches()) {
+          Matcher colorMatcher = colorPattern.matcher(command); colorMatcher.find();
+          String color = colorMatcher.group(1).toLowerCase();
+          this.console.setForeground(this.colorsMap.getOrDefault(color, this.console.getForeground()));
+        } else if (clsPattern.matcher(command).matches()) {
+          this.cls();
+        } else if (datePattern.matcher(command).matches()) {
+          this.console.append(this.date());
+        } else if(rmPattern.matcher(command).matches()) {
+          Matcher rmMatcher = rmPattern.matcher(command); rmMatcher.find();
+          String pathToFile = rmMatcher.group(1);
+          this.rm(path, pathToFile);
+        } else if (helpPattern.matcher(command).matches()) {
+          this.console.append(this.help());
+        } else if (exitPattern.matcher(command).matches()) {
+          System.exit(0);
+        } else {
+          this.console.append("Ти позерай шо пишеш, бо я тебе не розуміву..\n");
+        }
+        this.showPath();
+      } catch (Exception e) {
+        System.out.println(e.getMessage());
+        this.cls();
+        this.showPath();
       }
-      else {
-        this.console.append("Ти позерай шо пишеш, бо я не розуміву!\n");
-      }
-      this.console.append(path + "> ");
     }
   }//GEN-LAST:event_onKeyReleased
 
@@ -141,6 +178,56 @@ public class CMD extends javax.swing.JFrame {
     });
   }
 
+  public String date() {
+    Calendar calendar = Calendar.getInstance();
+    Date currentDate = calendar.getTime();
+    SimpleDateFormat formatDate = new SimpleDateFormat("yyyy.MM.dd HH:mm");
+    return formatDate.format(currentDate) + "\n";
+  }
+  
+  public String help() {
+    return String.join("\n", new String[] {
+      "Ту є то, шо мож робити:",
+      "> создай мі папку [путь] - створює папку за заданим шляхом",
+      "> пуйти [путь] - змінює директорію за заданим шляхом",
+      "> вушмарь [путь] - видаляє файл або папку за заданим шляхом",
+      "> цвіт [червений|помаранчевий|зелений|як ся було] - змінює колір шрифту",
+      "> вкажи шо маєш - виводить вміст теперішньої папки",
+      "> повтерай всьо - очищує екран",
+      "> вкажи нишню дату - виводить теперішню дату",
+      "> поможи мі - виводить список доступних команд",
+      "> вуйти гет - закриває вікно"
+    }) + "\n";
+  }
+  
+  public void rm(String currentPath, String pathToFile) {
+    File file = new File(pathToFile);
+    if(file.isAbsolute()){
+      file.delete();
+    } else {
+      file = new File(currentPath + "\\" + pathToFile);
+      file.delete();
+    }
+  }
+  
+  public void showPath() {
+    this.console.append(path + "> ");
+  }
+  
+  public void cls() {
+    this.console.setText("");
+  }
+  
+  public void mkdir(String currentPath, String pathToDir){
+    File file = new File(pathToDir);
+    if (file.isAbsolute()) {
+      file.mkdir();
+    } else {
+      file = new File(currentPath + "\\" + pathToDir);
+      file.mkdir();
+    }
+  }
+  
   public String dir(String path) {
     File folder = new File(path);
     return String.join("\n", folder.list()) + "\n";

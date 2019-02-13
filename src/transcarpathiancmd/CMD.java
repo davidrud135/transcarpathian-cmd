@@ -3,10 +3,12 @@ package transcarpathiancmd;
 import java.awt.Color;
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -36,17 +38,19 @@ public class CMD extends javax.swing.JFrame {
   Pattern helpPattern = Pattern.compile("^поможи мі$", ignoreUKRCase);
   Pattern exitPattern = Pattern.compile("^вуйти гет$", ignoreUKRCase);
   HashMap<String, Color> colorsMap= new HashMap<>();
+	List<String> arrOfCmds = new ArrayList<>();
   String path = System.getProperty("user.dir");
   String[] allLines;
   String lastLine;
   String command;
+	int counterOfCommands = 0;
   
   public CMD() {
     initComponents();
     this.colorsMap.put("червений", Color.red);
     this.colorsMap.put("помаранчевий", Color.orange);
     this.colorsMap.put("зелений", Color.green);
-    this.colorsMap.put("як ся було", Color.white);
+    this.colorsMap.put("як сі було", Color.white);
     this.showPath();
   }
 
@@ -70,6 +74,9 @@ public class CMD extends javax.swing.JFrame {
     console.setForeground(new java.awt.Color(255, 255, 255));
     console.setRows(5);
     console.addKeyListener(new java.awt.event.KeyAdapter() {
+      public void keyPressed(java.awt.event.KeyEvent evt) {
+        onKeyPressed(evt);
+      }
       public void keyReleased(java.awt.event.KeyEvent evt) {
         onKeyReleased(evt);
       }
@@ -108,53 +115,6 @@ public class CMD extends javax.swing.JFrame {
     pack();
   }// </editor-fold>//GEN-END:initComponents
 
-  private void onKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_onKeyReleased
-    if (evt.getKeyCode() == 10) {
-      try {
-        allLines = this.console.getText().split("\n");
-        lastLine = allLines[allLines.length - 1];
-        String clearLastLine = lastLine.replaceAll(" +", " ").trim();
-        Matcher lineMatcher = linePattern.matcher(clearLastLine); lineMatcher.find();
-        path = lineMatcher.group(1);
-        command = lineMatcher.group(2);
-        if (cdPattern.matcher(command).matches()) {
-          Matcher cdMatcher = cdPattern.matcher(command); cdMatcher.find();
-          String newPath = cdMatcher.group(1);
-          path = this.cd(path, newPath);
-        } else if (dirPattern.matcher(command).matches()) {
-          this.console.append(this.dir(path));
-        } else if(mkdirPattern.matcher(command).matches()) {
-          Matcher mkdirMatcher = mkdirPattern.matcher(command); mkdirMatcher.find();
-          String pathToDir = mkdirMatcher.group(1);
-          this.mkdir(path, pathToDir);
-        } else if (colorPattern.matcher(command).matches()) {
-          Matcher colorMatcher = colorPattern.matcher(command); colorMatcher.find();
-          String color = colorMatcher.group(1).toLowerCase();
-          this.console.setForeground(this.colorsMap.getOrDefault(color, this.console.getForeground()));
-        } else if (clsPattern.matcher(command).matches()) {
-          this.cls();
-        } else if (datePattern.matcher(command).matches()) {
-          this.console.append(this.date());
-        } else if(rmPattern.matcher(command).matches()) {
-          Matcher rmMatcher = rmPattern.matcher(command); rmMatcher.find();
-          String pathToFile = rmMatcher.group(1);
-          this.rm(path, pathToFile);
-        } else if (helpPattern.matcher(command).matches()) {
-          this.console.append(this.help());
-        } else if (exitPattern.matcher(command).matches()) {
-          System.exit(0);
-        } else {
-          this.console.append("Ти позерай шо пишеш, бо я тебе не розуміву..\n");
-        }
-        this.showPath();
-      } catch (Exception e) {
-        System.out.println(e.getMessage());
-        this.cls();
-        this.showPath();
-      }
-    }
-  }//GEN-LAST:event_onKeyReleased
-
   private void onFormClose(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_onFormClose
     System.exit(0);
   }//GEN-LAST:event_onFormClose
@@ -162,6 +122,27 @@ public class CMD extends javax.swing.JFrame {
   private void onFormHide(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_onFormHide
     setExtendedState(getExtendedState() | JFrame.ICONIFIED);
   }//GEN-LAST:event_onFormHide
+
+  private void onKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_onKeyPressed
+    boolean isArrowUp = evt.getKeyCode() == 38;
+    boolean isArrowDown = evt.getKeyCode() == 40;
+		
+		if(isArrowUp){
+			evt.consume();
+			this.toPreviousCommand();
+		} else if(isArrowDown){
+			evt.consume();
+			this.toNextCommand();
+		}
+  }//GEN-LAST:event_onKeyPressed
+
+  private void onKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_onKeyReleased
+    boolean isEnter = evt.getKeyCode() == 10;
+		
+		if(isEnter){
+			this.commandsProcessing();
+		}
+  }//GEN-LAST:event_onKeyReleased
 
   /**
    * @param args the command line arguments
@@ -202,6 +183,89 @@ public class CMD extends javax.swing.JFrame {
     });
   }
 
+	public void commandsProcessing(){
+		try {
+			allLines = this.console.getText().split("\n");
+			lastLine = allLines[allLines.length - 1];
+
+			String clearLastLine = lastLine.replaceAll(" +", " ").trim();
+			Matcher lineMatcher = linePattern.matcher(clearLastLine); lineMatcher.find();
+
+			path = lineMatcher.group(1);
+			command = lineMatcher.group(2);
+
+			if (cdPattern.matcher(command).matches()) {
+				Matcher cdMatcher = cdPattern.matcher(command); cdMatcher.find();
+				String newPath = cdMatcher.group(1);
+				path = this.cd(path, newPath);
+
+			} else if (dirPattern.matcher(command).matches()) {
+				this.console.append(this.dir(path));
+
+			} else if(mkdirPattern.matcher(command).matches()) {
+				Matcher mkdirMatcher = mkdirPattern.matcher(command); mkdirMatcher.find();
+				String pathToDir = mkdirMatcher.group(1);
+				this.mkdir(path, pathToDir);
+
+			} else if (colorPattern.matcher(command).matches()) {
+				Matcher colorMatcher = colorPattern.matcher(command); colorMatcher.find();
+				String color = colorMatcher.group(1).toLowerCase();
+				this.console.setForeground(this.colorsMap.getOrDefault(color, this.console.getForeground()));
+
+			} else if (clsPattern.matcher(command).matches()) {
+				this.cls();
+
+			} else if (datePattern.matcher(command).matches()) {
+				this.console.append(this.date());
+
+			} else if(rmPattern.matcher(command).matches()) {
+				Matcher rmMatcher = rmPattern.matcher(command); rmMatcher.find();
+				String pathToFile = rmMatcher.group(1);
+				this.rm(path, pathToFile);
+
+			} else if (helpPattern.matcher(command).matches()) {
+				this.console.append(this.help());
+
+			} else if (exitPattern.matcher(command).matches()) {
+				System.exit(0);
+
+			} else {
+				this.console.append("Ти позерай шо пишеш, бо я тебе не розуміву..\n");
+			}
+			
+			arrOfCmds.add(command);
+			counterOfCommands++;
+			this.showPath();
+			
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			this.cls();
+			this.showPath();
+		}
+	}
+	
+	public void toNextCommand(){
+		allLines = this.console.getText().split("\n");
+		lastLine = allLines[allLines.length - 1];
+		
+		if(counterOfCommands < arrOfCmds.size() - 1){
+			counterOfCommands++;
+			console.setText(Arrays.stream(allLines).limit(allLines.length - 1).collect(Collectors.joining("\n")) + "\n");
+			console.append(path + "> " + arrOfCmds.get(counterOfCommands));
+		}
+	}
+	
+	public void toPreviousCommand(){
+		allLines = this.console.getText().split("\n");
+		lastLine = allLines[allLines.length - 1];
+
+		if(allLines.length > 1 && counterOfCommands > 0){
+			counterOfCommands--;
+			console.setText(Arrays.stream(allLines).limit(allLines.length - 1).collect(Collectors.joining("\n")) + "\n");
+			console.append(path + "> " + arrOfCmds.get(counterOfCommands));
+		}
+	}
+	
   public String date() {
     Calendar calendar = Calendar.getInstance();
     Date currentDate = calendar.getTime();
@@ -234,7 +298,7 @@ public class CMD extends javax.swing.JFrame {
     }
   }
   
-  public void showPath() {
+  public final void showPath() {
     this.console.append(String.format("%s> ", path));
   }
   
@@ -257,7 +321,7 @@ public class CMD extends javax.swing.JFrame {
     return String.join("\n", folder.list()) + "\n";
   }
   
-  public String cd(String prevPath, String newPath){
+  public String cd(String prevPath, String newPath){// DO NOT FORGET
     if (!newPath.contains("..")) {
       File file = new File(newPath);
       if(file.exists() && file.isAbsolute() && file.isDirectory()){

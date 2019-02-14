@@ -56,10 +56,11 @@ public class CMD extends javax.swing.JFrame {
   public CMD() {
     initComponents();
     this.colorsMap.put("червений", Color.red);
-    this.colorsMap.put("помаранчевий", Color.orange);
+    this.colorsMap.put("блакитний", Color.cyan);
     this.colorsMap.put("зелений", Color.green);
     this.colorsMap.put("як сі було", Color.white);
     this.showPath();
+    this.console.requestFocus();
   }
 
   @SuppressWarnings("unchecked")
@@ -270,7 +271,9 @@ public class CMD extends javax.swing.JFrame {
 			iOException.printStackTrace();
 			return "";
 		}
-		return String.join("\n", arrOfLines) + "\n";
+		return (arrOfLines.isEmpty()) 
+      ? "Ниє шо позирити\n"
+      : String.join("\n", arrOfLines) + "\n";
 	}
 	
 	public void copy(String currentPath, String pathToFile, String newPath) {
@@ -316,7 +319,7 @@ public class CMD extends javax.swing.JFrame {
       "> создай мі папку [путь] - створює папку за заданим шляхом",
       "> пуйти [путь] - змінює директорію за заданим шляхом",
       "> вушмарь [путь] - видаляє файл або папку за заданим шляхом",
-      "> цвіт [червений|помаранчевий|зелений|як ся було] - змінює колір шрифту",
+      "> цвіт [червений|блакитний|зелений|як сі було] - змінює колір шрифту",
 			"> дай попозерати [путь] - відображає вміст файлу за заданим шляхом",
       "> вкажи шо маєш - виводить вміст теперішньої папки",
       "> повтерай всьо - очищує екран",
@@ -356,7 +359,11 @@ public class CMD extends javax.swing.JFrame {
   
   public String dir(String path) {
     File folder = new File(path);
-    return String.join("\n", folder.list()) + "\n";
+    String[] folderItems = folder.list();
+    int folderItemsAmount = folderItems.length;
+    return (folderItemsAmount == 0) 
+      ? "Нич туй не маю\n"
+      : String.join("\n", folderItems) + "\n";
   }
   
   public String cd(String prevPath, String newPath){

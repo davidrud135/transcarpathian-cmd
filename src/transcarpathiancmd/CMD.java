@@ -208,7 +208,6 @@ public class CMD extends javax.swing.JFrame {
           cursorPosition -= line.length();
         }
       }
-      System.out.println(cursorPosition);
       if (cursorPosition <= path.length() + allLinesAmount + 1) {
         evt.consume();
       }

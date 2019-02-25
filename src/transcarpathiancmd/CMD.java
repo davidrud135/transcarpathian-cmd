@@ -42,7 +42,7 @@ public class CMD extends javax.swing.JFrame {
   Pattern dirPattern = Pattern.compile("^вкажи шо маєш$", ignoreUKRCase);
   Pattern clsPattern = Pattern.compile("^повтерай всьо$", ignoreUKRCase);
   Pattern datePattern = Pattern.compile("^вкажи нишню дату$", ignoreUKRCase);
-  Pattern helpPattern = Pattern.compile("^поможи мі$", ignoreUKRCase);
+  Pattern helpPattern = Pattern.compile("^поможи ми$", ignoreUKRCase);
   Pattern exitPattern = Pattern.compile("^вуйти гет$", ignoreUKRCase);
 	
   HashMap<String, Color> colorsMap= new HashMap<>();
@@ -58,7 +58,7 @@ public class CMD extends javax.swing.JFrame {
     this.colorsMap.put("червений", Color.red);
     this.colorsMap.put("блакитний", Color.cyan);
     this.colorsMap.put("зелений", Color.green);
-    this.colorsMap.put("як сі було", Color.white);
+    this.colorsMap.put("як ся було", Color.white);
     this.showPath();
     this.console.requestFocus();
   }
@@ -82,6 +82,7 @@ public class CMD extends javax.swing.JFrame {
     console.setFont(new java.awt.Font("Century Gothic", 3, 20)); // NOI18N
     console.setForeground(new java.awt.Color(255, 255, 255));
     console.setRows(5);
+    console.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
     console.addKeyListener(new java.awt.event.KeyAdapter() {
       public void keyPressed(java.awt.event.KeyEvent evt) {
         onKeyPressed(evt);
@@ -193,7 +194,25 @@ public class CMD extends javax.swing.JFrame {
     boolean isArrowUp = evt.getKeyCode() == 38;
     boolean isArrowDown = evt.getKeyCode() == 40;
 		allLines = this.console.getText().split("\n");
-		lastLine = allLines[allLines.length - 1];
+    int allLinesAmount = allLines.length;
+		lastLine = allLines[allLinesAmount - 1];
+    
+    boolean isArrowLeft = evt.getKeyCode() == 37;
+    boolean isBackspace = evt.getKeyCode() == 8;
+    
+    if (isArrowLeft || isBackspace) {
+      int cursorPosition = console.getCaretPosition();
+      if (allLinesAmount > 1) {
+        for (int i = 0; i < allLinesAmount - 1; i++) {
+          String line = allLines[i];
+          cursorPosition -= line.length();
+        }
+      }
+      System.out.println(cursorPosition);
+      if (cursorPosition <= path.length() + allLinesAmount + 1) {
+        evt.consume();
+      }
+    }
     
 		if(isArrowUp) {
 			evt.consume();
@@ -319,12 +338,12 @@ public class CMD extends javax.swing.JFrame {
       "> создай мі папку [путь] - створює папку за заданим шляхом",
       "> пуйти [путь] - змінює директорію за заданим шляхом",
       "> вушмарь [путь] - видаляє файл або папку за заданим шляхом",
-      "> цвіт [червений|блакитний|зелений|як сі було] - змінює колір шрифту",
+      "> цвіт [червений|блакитний|зелений|як ся було] - змінює колір шрифту",
 			"> дай попозерати [путь] - відображає вміст файлу за заданим шляхом",
       "> вкажи шо маєш - виводить вміст теперішньої папки",
       "> повтерай всьо - очищує екран",
       "> вкажи нишню дату - виводить теперішню дату",
-      "> поможи мі - виводить список доступних команд",
+      "> поможи ми - виводить список доступних команд",
       "> вуйти гет - закриває вікно"
     }) + "\n";
   }
